@@ -23,6 +23,6 @@ COPY app/ /home/bot/app/
 COPY haskellbot.cabal /home/bot/
 COPY CHANGELOG.md /home/bot/
 COPY Def.hs /home/bot/
-RUN 'echo "$TOKEN" > /home/bot/token'
+RUN "echo \"$TOKEN\" > /home/bot/token"
 RUN cabal build
 CMD ["cabal", "run", "haskellbot", "--", "$(< /home/bot/token)"]
