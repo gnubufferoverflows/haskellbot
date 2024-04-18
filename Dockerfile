@@ -1,11 +1,10 @@
  #escape=\
  FROM docker.io/alpine:3.14
 
- ARG TOKEN
  RUN set -ex; \
      \
      apk update; \
-     apk add curl binutils-gold curl gcc g++ gmp-dev libc-dev libffi-dev make musl-dev ncurses-dev perl tar xz zlib-dev coreutils; \
+     apk add curl binutils-gold curl gcc g++ gmp-dev libc-dev libffi-dev make musl-dev ncurses-dev perl tar xz zlib-dev; \
      adduser -D bot;
 
 USER bot
@@ -23,7 +22,6 @@ COPY app/ /home/bot/app/
 COPY haskellbot.cabal /home/bot/
 COPY CHANGELOG.md /home/bot/
 COPY Def.hs /home/bot/
-RUN "touch token"
-RUN "echo \"$TOKEN\" > token"
+COPY token.txt /home/bot/
 RUN cabal build
-CMD ["cabal", "run", "haskellbot", "--", "$(< /home/bot/token)"]
+CMD ["cabal", "run", "haskellbot", "--", "$(< /home/bot/token.txt)"]
