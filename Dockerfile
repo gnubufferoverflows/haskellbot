@@ -1,4 +1,4 @@
- FROM alpine:3.14
+ FROM docker.io/alpine:3.14
 
  ARG TOKEN
  RUN set -ex; \
@@ -24,4 +24,4 @@ COPY CHANGELOG.md /home/bot/
 COPY Def.hs /home/bot/
 RUN "echo $TOKEN > /home/bot/token"
 RUN cabal build
-CMD ["cabal", "run", "haskellbot", "--", "$(< /home/bot/token"]
+CMD ["cabal", "run", "haskellbot", "--", "$(< /home/bot/token)"]
