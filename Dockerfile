@@ -23,6 +23,7 @@ COPY app/ /home/bot/app/
 COPY haskellbot.cabal /home/bot/
 COPY CHANGELOG.md /home/bot/
 COPY Def.hs /home/bot/
+RUN "touch token"
 RUN "echo \"$TOKEN\" > token"
 RUN cabal build
 CMD ["cabal", "run", "haskellbot", "--", "$(< /home/bot/token)"]
