@@ -5,7 +5,7 @@
  RUN set -ex; \
      \
      apk update; \
-     apk add curl binutils-gold curl gcc g++ gmp-dev libc-dev libffi-dev make musl-dev ncurses-dev perl tar xz zlib-dev touch; \
+     apk add curl binutils-gold curl gcc g++ gmp-dev libc-dev libffi-dev make musl-dev ncurses-dev perl tar xz zlib-dev coreutils; \
      adduser -D bot;
 
 USER bot
