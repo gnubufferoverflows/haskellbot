@@ -51,7 +51,7 @@ replyMessage oldMsg newMsg = void $ restCall (R.CreateMessage (messageChannelId 
 
 haskellEvalHandler :: Message -> Text -> DiscordHandler ()
 haskellEvalHandler msg content = do
-  (_, out, err) <- liftIO $ readProcessWithExitCode "mueval" ["-n", "-l", "Def.hs", "-t", "5", "-e", unpack content] ""
+  (_, out, err) <- liftIO $ readProcessWithExitCode "mueval" ["-n", "-l", "Def.hs", "-t", "10", "-e", unpack content] ""
   case (out, err) of
     ([], []) -> void $ restCall (R.CreateMessage (messageChannelId msg) "The process was terminated. Try the command again.")
     _ -> do
