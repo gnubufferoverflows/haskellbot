@@ -22,6 +22,5 @@ COPY app/ /home/bot/app/
 COPY haskellbot.cabal /home/bot/
 COPY CHANGELOG.md /home/bot/
 COPY Def.hs /home/bot/
-COPY token.txt /home/bot/
 RUN cabal build
-CMD ["sh", "-c","cabal run haskellbot -- $(< /home/bot/token.txt)"]
+CMD ["sh", "-c","cabal run haskellbot -- $TOKEN"]
