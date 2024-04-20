@@ -2,6 +2,9 @@ module Def where
 
 import Data.Functor.Contravariant
 import Data.Void
+import Control.Monad.Tardis
+import Control.Monad.Logic
+import Control.Monad.Trans.Select
 
 import ShowFun
 import Debug.SimpleReflect
