@@ -23,4 +23,5 @@ COPY haskellbot.cabal /home/bot/
 COPY CHANGELOG.md /home/bot/
 COPY Def.hs /home/bot/
 RUN cabal build
+RUN hoogle generate
 CMD ["sh", "-c","cabal run haskellbot -- $TOKEN"]

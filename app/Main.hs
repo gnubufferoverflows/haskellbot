@@ -76,7 +76,7 @@ haskellTypeHandler msg content = do
       }
 
 hoogleHandler :: Message -> Text -> DiscordHandler ()
-hoogleHandler msg content = do
+hoogleHandler msg content = if not (isInfixOf "generate" content || isInfixOf "server" content || isInfixOf "replay" content || isInfixOf "test" content) then do
   (_, out, err) <- liftIO $ readProcessWithExitCode "hoogle" [unpack content] ""
   case (out, err) of
     ([], []) -> void $ restCall (R.CreateMessage (messageChannelId msg) "The process was terminated. Try the command again.")
@@ -85,7 +85,7 @@ hoogleHandler msg content = do
         | Prelude.null out && Prelude.null err -> replyMessage msg "The process was terminated. Try again"
         | Prelude.null out -> replyMessage msg (pack err)
         | otherwise -> replyMessage msg (pack ("```" <> out <> "```"))
-      }
+      } else void $ restCall (R.CreateMessage (messageChannelId msg) "For security reasons, this isn't allowed. Your search cannot contain the words: generate, server, replay, test.")
 
 helpHandler :: Message -> Text -> DiscordHandler ()
 helpHandler msg _ = do
