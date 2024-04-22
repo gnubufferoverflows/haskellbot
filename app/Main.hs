@@ -17,6 +17,7 @@ import Data.Text.IO (hGetContents)
 import GHC.IO.FD (openFile)
 import GHC.IO.IOMode (IOMode(ReadMode))
 import System.Environment (getArgs)
+import Pointfree
 import Language.Haskell.Interpreter (eval, set, reset, setImportsQ, loadModules, liftIO,
                                      installedModulesInScope, languageExtensions, availableExtensions,
                                      typeOf, setTopLevelModules, runInterpreter,
@@ -49,6 +50,9 @@ checkText m = (==) (toLower $ messageContent m)
 replyMessage :: Message -> Text -> DiscordHandler ()
 replyMessage oldMsg newMsg = void $ restCall (R.CreateMessage (messageChannelId oldMsg) newMsg)
 
+pointFreeHandler :: Message -> Text -> DiscordHandler ()
+pointFreeHandler msg content = replyMessage msg $ "```hs" <> (pack $ show (pointfree $ unpack content)) <> "```"
+
 haskellEvalHandler :: Message -> Text -> DiscordHandler ()
 haskellEvalHandler msg content = do
   (_, out, err) <- liftIO $ readProcessWithExitCode "mueval" ["-n", "-l", "Def.hs", "-t", "10", "-e", unpack content] ""
@@ -72,7 +76,7 @@ haskellTypeHandler msg content = do
       case () of {_
         | Prelude.null out && Prelude.null err -> replyMessage msg "The process was terminated. Try again"
         | Prelude.null out -> replyMessage msg (pack err)
-        | otherwise -> replyMessage msg  (pack ("```hs\n" <> out <> "```"))
+        | otherwise -> replyMessage msg (pack ("```hs\n" <> out <> "```"))
       }
 
 hoogleHandler :: Message -> Text -> DiscordHandler ()
@@ -95,6 +99,7 @@ helpHandler msg _ = do
                                                                                                                         createEmbedColor = Just DiscordColorPurple,
                                                                                                                         createEmbedDescription = "To run Haskell code: `>>= your code here`\n \
                                                                                                                         \To check a type: `:t type`\n \
+                                                                                                                        \Attempt to make code point free: `:pl text`\n \
                                                                                                                         \To look something up on Hoogle: `hoogle your search here`\n\
                                                                                                                         \To to get this help message: `>>=help`\
                                                                                                                         \"
@@ -110,7 +115,7 @@ commandPrefix command (prefix,_) = do
 type CommandMapping f = (Text, Message -> Text -> DiscordHandler f)
 type CommandList f = [CommandMapping f]
 mappings :: CommandList ()
-mappings = [(">>=help", helpHandler), (">>= ", haskellEvalHandler), (">>=", haskellEvalHandler), (":t ", haskellTypeHandler), ("hoogle ", hoogleHandler)]
+mappings = [(">>=help", helpHandler), (":pl ", pointFreeHandler), (">>= ", haskellEvalHandler), (">>=", haskellEvalHandler), (":t ", haskellTypeHandler), ("hoogle ", hoogleHandler)]
 
 executeCommand :: Message -> DiscordHandler () -- this is not really a safe function because i like to live dangerously, and absolutely terribly written too so probably that should be fixed
 executeCommand msg = let findFirstMaybe pred (x:xs) = case pred x of {Nothing -> findFirstMaybe pred xs; Just y -> (y, x)}
