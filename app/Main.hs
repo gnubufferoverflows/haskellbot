@@ -51,7 +51,12 @@ replyMessage :: Message -> Text -> DiscordHandler ()
 replyMessage oldMsg newMsg = void $ restCall (R.CreateMessage (messageChannelId oldMsg) newMsg)
 
 pointFreeHandler :: Message -> Text -> DiscordHandler ()
-pointFreeHandler msg content = replyMessage msg $ "```hs\n" <> (pack $ show (pointfree $ unpack content)) <> "```"
+pointFreeHandler msg content = let packed = pointfree $ unpack content in case packed of
+                                 [] -> replyMessage msg "Sorry, I cannot reduce this expression any further."
+                                 _ -> mapM_ (replyMessage msg) (fmap (\str -> pack ("```hs\n" <> str <> "```")) packed)  
+
+
+--pointFreeHandler msg content = replyMessage msg $ "```hs\n" <> (pack $ show (pointfree $ unpack content)) <> "```"
 
 haskellEvalHandler :: Message -> Text -> DiscordHandler ()
 haskellEvalHandler msg content = do
