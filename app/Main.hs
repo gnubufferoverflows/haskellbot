@@ -15,8 +15,10 @@ import qualified Discord.Requests as R
 import Discord.Handle (DiscordHandle(discordHandleLog))
 import Data.Text.IO (hGetContents)
 import GHC.IO.FD (openFile)
+import System.IO.Unsafe
 import GHC.IO.IOMode (IOMode(ReadMode))
 import System.Environment (getArgs)
+import System.Timeout (timeout)
 import Pointfree
 import Language.Haskell.Interpreter (eval, set, reset, setImportsQ, loadModules, liftIO,
                                      installedModulesInScope, languageExtensions, availableExtensions,
@@ -50,11 +52,17 @@ checkText m = (==) (toLower $ messageContent m)
 replyMessage :: Message -> Text -> DiscordHandler ()
 replyMessage oldMsg newMsg = void $ restCall (R.CreateMessage (messageChannelId oldMsg) newMsg)
 
-pointFreeHandler :: Message -> Text -> DiscordHandler ()
-pointFreeHandler msg content = let packed = pointfree $ unpack content in case packed of
-                                 [] -> replyMessage msg "Sorry, I cannot reduce this expression any further."
-                                 _ -> mapM_ (replyMessage msg) (fmap (\str -> pack ("```hs\n" <> str <> "```")) packed)  
+-- safely calls the pointfree function in a way that will timeout if the function fails to halt
+pfWrapper :: Text -> Maybe [String]
+pfWrapper msg = unsafePerformIO $ timeout 5000000 (let x = pointfree (unpack msg) in x `seq` return x)
 
+pointFreeHandler :: Message -> Text -> DiscordHandler ()
+pointFreeHandler msg content = let packed = pfWrapper content
+                               in
+                               case packed of
+                                 Just [] -> replyMessage msg "Sorry, I cannot reduce this expression any further." 
+                                 Just xs -> mapM_ (replyMessage msg) (fmap (\str -> pack ("```hs\n" <> str <> "```")) xs)
+                                 Nothing -> replyMessage msg "Command timed out."
 
 --pointFreeHandler msg content = replyMessage msg $ "```hs\n" <> (pack $ show (pointfree $ unpack content)) <> "```"
 

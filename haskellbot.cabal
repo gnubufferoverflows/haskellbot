@@ -35,6 +35,6 @@ executable haskellbot
     -- other-extensions:
     build-depends:    base
     ghc-options:      -threaded
-    build-depends:    base, text, unliftio, discord-haskell, hint, process, pointfree
+    build-depends:    base, text, unliftio, discord-haskell, hint, process, pointfree, transformers
     hs-source-dirs:   app
     default-language: Haskell2010
